@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Game.h"
 
-Game::Game( const Window& window ) 
-	:BaseGame{ window }
+Game::Game(const Window& window) : BaseGame(window)
 {
 	Initialize();
+	m_LastSpawnTime = std::chrono::steady_clock::now();
 }
 
 Game::~Game( )
@@ -14,7 +14,10 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
-	
+	for (int i = 0; i < 10; i++)
+	{
+		m_Entity[i] = new Entity(Point2f{ 0, 0 });
+	}
 }
 
 void Game::Cleanup( )
@@ -23,30 +26,54 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
-	// Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
+	m_Player.Update(elapsedSec);
+
+	// Check if 5 seconds have elapsed since the last spawn
+	auto currentTime = std::chrono::steady_clock::now();
+	auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - m_LastSpawnTime).count();
+
+	if (elapsedSeconds >= 5)
+	{
+		// Spawn the entities
+		SpawnEntity();
+
+		// Update the last spawn time
+		m_LastSpawnTime = currentTime;
+	}
+
+	for (int i = 0; i < 10; i++)
+	{
+		
+			m_Entity[i]->Update(m_Player, m_Map, elapsedSec);
+		
+	}
+	
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
+	m_Map.Draw();
+	m_Player.Draw();
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (m_Entity[i] != nullptr)
+		{
+			m_Entity[i]->Draw();
+		}
+	}
+
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
-	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
+	m_Player.ProcessKeyDownEvent(e);
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
+	m_Player.ProcessKeyUpEvent(e);
 	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
 	//switch ( e.keysym.sym )
 	//{
@@ -65,7 +92,7 @@ void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 {
-	//std::cout << "MOUSEMOTION event: " << e.x << ", " << e.y << std::endl;
+	m_Player.ProcessMouseMotionEvent(e);
 }
 
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
@@ -107,4 +134,15 @@ void Game::ClearBackground( ) const
 {
 	glClearColor( 0.0f, 0.0f, 0.3f, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
+}
+
+void Game::SpawnEntity()
+{
+	for (int i = 0; i < 10; i++)
+	{
+		float posX = static_cast<float>(rand() % 1300 + 50);
+		float posY = static_cast<float>(rand() % 600 + 50);
+
+		m_Entity[i] = new Entity(Point2f{ posX, posY });
+	}
 }

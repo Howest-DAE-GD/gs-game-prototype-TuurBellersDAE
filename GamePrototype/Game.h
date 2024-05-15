@@ -1,5 +1,10 @@
 #pragma once
 #include "BaseGame.h"
+#include "Player.h"
+#include "Entity.h"
+#include "Map.h"
+#include <chrono>
+
 class Game : public BaseGame
 {
 public:
@@ -27,4 +32,14 @@ private:
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
+
+	void SpawnEntity();
+
+	std::chrono::steady_clock::time_point m_LastSpawnTime;
+
+	Map m_Map;
+	Entity* m_Entity[10];
+	Player m_Player;
+
+	//Entity m_Entity;
 };
