@@ -14,10 +14,17 @@ Game::~Game( )
 
 void Game::Initialize( )
 {
-	for (int i = 0; i < 10; i++)
+	m_GameState = GameState::menu;
+
+	m_IntroTxt = new Texture("intro.png");
+
+	// Clear the existing entities
+	for (Entity* entity : m_Entity)
 	{
-		m_Entity[i] = new Entity(Point2f{ 0, 0 });
+		delete entity;
 	}
+
+	m_Entity.clear();
 }
 
 void Game::Cleanup( )
@@ -26,49 +33,88 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
-	m_Player.Update(elapsedSec);
-
-	// Check if 5 seconds have elapsed since the last spawn
-	auto currentTime = std::chrono::steady_clock::now();
-	auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - m_LastSpawnTime).count();
-
-	if (elapsedSeconds >= 5)
+	switch (m_GameState)
 	{
-		// Spawn the entities
+	case GameState::menu:
+		break;
+	case GameState::active:
+		m_Player.Update(elapsedSec);
+
 		SpawnEntity();
 
-		// Update the last spawn time
-		m_LastSpawnTime = currentTime;
+		for (int i = 0; i < m_Entity.size(); i++)
+		{
+			if (m_Entity[i] != nullptr)
+			{
+				if (m_Entity[i]->IsAbducted() or m_Entity[i]->IsSecured())
+				{
+					m_Entity[i] = nullptr;
+					delete m_Entity[i];
+				}
+			}
+		}
+
+		for (int i = 0; i < m_Entity.size(); i++)
+		{
+			if (m_Entity[i] != nullptr)
+			{
+				m_Entity[i]->Update(m_Player, m_Map, *m_Entity[i], elapsedSec);
+			}
+		}
+
+		break;
 	}
 
-	for (int i = 0; i < 10; i++)
-	{
-		
-			m_Entity[i]->Update(m_Player, m_Map, elapsedSec);
-		
-	}
 	
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
-	m_Map.Draw();
-	m_Player.Draw();
 
-	for (int i = 0; i < 10; i++)
+	switch (m_GameState)
 	{
-		if (m_Entity[i] != nullptr)
+	case GameState::menu:
+		m_IntroTxt->Draw(Point2f{ 0, 0 },
+			Rectf{ 0,0,m_IntroTxt->GetWidth(),m_IntroTxt->GetHeight() });
+		break;
+	case GameState::active:
+		m_Map.Draw();
+		m_Player.Draw();
+
+		for (int i = 0; i < m_Entity.size(); i++)
 		{
-			m_Entity[i]->Draw();
+			if (m_Entity[i] != nullptr)
+			{
+				m_Entity[i]->Draw();
+			}
 		}
+		break;
 	}
 
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
-	m_Player.ProcessKeyDownEvent(e);
+	switch (e.keysym.sym)
+	{
+	case SDLK_ESCAPE:
+		BaseGame::~BaseGame();
+		break;
+	case SDLK_SPACE:
+		m_GameState = GameState::active;
+		break;
+	}
+
+	switch (m_GameState)
+	{
+	case GameState::menu:
+		break;
+	case GameState::active:
+		m_Player.ProcessKeyDownEvent(e);
+		break;
+	}
+	
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
@@ -92,7 +138,15 @@ void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
 {
-	m_Player.ProcessMouseMotionEvent(e);
+	switch (m_GameState)
+	{
+	case GameState::menu:
+		break;
+	case GameState::active:
+		m_Player.ProcessMouseMotionEvent(e);
+		break;
+	}
+	
 }
 
 void Game::ProcessMouseDownEvent( const SDL_MouseButtonEvent& e )
@@ -138,11 +192,19 @@ void Game::ClearBackground( ) const
 
 void Game::SpawnEntity()
 {
-	for (int i = 0; i < 10; i++)
+	// Check if it's time to spawn a new entity
+	auto currentTime = std::chrono::steady_clock::now();
+	auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - m_LastSpawnTime).count();
+
+	if (elapsedSeconds >= 5)
 	{
+		// Spawn a new entity
 		float posX = static_cast<float>(rand() % 1300 + 50);
 		float posY = static_cast<float>(rand() % 600 + 50);
 
-		m_Entity[i] = new Entity(Point2f{ posX, posY });
+		m_Entity.push_back(new Entity(Point2f{ posX, posY }));
+
+		// Update the last spawn time
+		m_LastSpawnTime = currentTime;
 	}
 }

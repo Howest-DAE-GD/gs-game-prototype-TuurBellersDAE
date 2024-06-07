@@ -35,6 +35,7 @@ private:
 	Vector2f m_Velocity;
 	float m_Speed;
 	float m_Acceleration;
+	float m_Stamina; ////////
 	float m_MaxSpeed;
 	float m_Resistance;
 

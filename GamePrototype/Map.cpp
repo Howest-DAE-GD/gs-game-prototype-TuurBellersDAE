@@ -41,3 +41,20 @@ bool Map::IsInGreenZone(Entity& entity) const
 		return false;
 	}
 }
+
+bool Map::IsInRedZone(Entity& entity) const
+{
+	if (utils::IsOverlapping(m_RedZone, entity.GetEntityCircle()))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+Circlef Map::GetRedZone() const
+{
+	return m_RedZone;
+}

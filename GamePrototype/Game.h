@@ -4,6 +4,8 @@
 #include "Entity.h"
 #include "Map.h"
 #include <chrono>
+#include <vector>
+#include "Texture.h"
 
 class Game : public BaseGame
 {
@@ -35,10 +37,17 @@ private:
 
 	void SpawnEntity();
 
-	std::chrono::steady_clock::time_point m_LastSpawnTime;
+	enum class GameState
+	{
+		menu,active
+	};
 
+	GameState m_GameState;
+	Texture* m_IntroTxt;
+
+	std::chrono::steady_clock::time_point m_LastSpawnTime;
+	std::vector<Entity*> m_Entity;
 	Map m_Map;
-	Entity* m_Entity[10];
 	Player m_Player;
 
 	//Entity m_Entity;
