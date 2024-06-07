@@ -18,6 +18,11 @@ void Game::Initialize( )
 
 	m_IntroTxt = new Texture("intro.png");
 
+	m_SavedStat = new Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 100, Color4f{ 0,1,0,1 });
+	m_LostStat = new Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 100, Color4f{ 1,0,0,1 });
+
+	m_SpawnTimer = 4;
+
 	// Clear the existing entities
 	for (Entity* entity : m_Entity)
 	{
@@ -29,6 +34,16 @@ void Game::Initialize( )
 
 void Game::Cleanup( )
 {
+	for (Entity* entity : m_Entity)
+	{
+		delete entity;
+	}
+
+	m_Entity.clear();
+	m_SavedStat = nullptr;
+	delete m_SavedStat;
+	m_LostStat = nullptr;
+	delete m_LostStat;
 }
 
 void Game::Update( float elapsedSec )
@@ -64,7 +79,8 @@ void Game::Update( float elapsedSec )
 
 		break;
 	}
-
+	m_SavedStat = new Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 40, Color4f{ 0,1,0,1 });
+	m_LostStat = new Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 });
 	
 }
 
@@ -89,6 +105,8 @@ void Game::Draw( ) const
 				m_Entity[i]->Draw();
 			}
 		}
+		m_SavedStat->Draw(Point2f{ 15,650 }, Rectf{ 0,0,m_SavedStat->GetWidth(),m_SavedStat->GetHeight() });
+		m_LostStat->Draw(Point2f{ 15,600 }, Rectf{ 0,0,m_LostStat->GetWidth(),m_LostStat->GetHeight() });
 		break;
 	}
 
@@ -101,7 +119,7 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 	case SDLK_ESCAPE:
 		BaseGame::~BaseGame();
 		break;
-	case SDLK_SPACE:
+	case SDLK_p:
 		m_GameState = GameState::active;
 		break;
 	}
@@ -196,8 +214,16 @@ void Game::SpawnEntity()
 	auto currentTime = std::chrono::steady_clock::now();
 	auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - m_LastSpawnTime).count();
 
-	if (elapsedSeconds >= 5)
+	if (elapsedSeconds >= m_SpawnTimer)
 	{
+		if (m_SpawnTimer > 1)
+		{
+			m_SpawnTimer -= 0.1f;
+		}
+		else
+		{
+			m_SpawnTimer = 1;
+		}
 		// Spawn a new entity
 		float posX = static_cast<float>(rand() % 1300 + 50);
 		float posY = static_cast<float>(rand() % 600 + 50);

@@ -18,8 +18,8 @@ Player::Player() :
 	m_HitBox.radiusY = 15;
 
 	m_AttractionZone.center = m_PlayerPos;
-	m_AttractionZone.radiusX = 100;
-	m_AttractionZone.radiusY = 100;
+	m_AttractionZone.radiusX = 60;
+	m_AttractionZone.radiusY = 60;
 }
 
 Player::~Player()

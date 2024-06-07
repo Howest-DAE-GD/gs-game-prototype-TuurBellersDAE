@@ -19,7 +19,12 @@ public:
 	bool IsSecured();
 	bool IsAbducted();
 
+	static int& GetEntitySave();
+	static int& GetEntityLost();
+
 	static int m_EntitySaved;
+	static int m_EntityLost;
+
 private:
 	enum class State
 	{

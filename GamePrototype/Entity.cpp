@@ -9,6 +9,7 @@
 #include <chrono>
 
 int Entity::m_EntitySaved = 0;
+int Entity::m_EntityLost = 0;
 
 Entity::Entity(Point2f pos) :
 	m_EntityPos{pos},
@@ -97,7 +98,7 @@ void Entity::Update(Player& player, Map& map, Entity& entity, float elapsedSec) 
 	}
 	if (map.IsInRedZone(*this))
 	{
-		++m_EntitySaved;
+		++m_EntityLost;
 		m_State = State::abducted;
 
 		m_Enemy = nullptr;
@@ -118,7 +119,7 @@ void Entity::SpawnEnemy(float elapsedSec)
 	// Check if it's time to spawn a new entity
 	m_TimeIdx += elapsedSec;
 	
-	if (m_TimeIdx >= 5 and !m_EnemySpawned)
+	if (m_TimeIdx >= 3 and !m_EnemySpawned)
 	{
 		float distance = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (300)));
 		float angle = static_cast<float>(rand());
@@ -153,4 +154,14 @@ bool Entity::IsAbducted()
 	}
 
 	return false;
+}
+
+int& Entity::GetEntitySave()
+{
+	return m_EntitySaved;
+}
+
+int& Entity::GetEntityLost()
+{
+	return m_EntityLost;
 }

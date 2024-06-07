@@ -4,7 +4,7 @@
 #include "Entity.h"
 
 Map::Map():
-	m_GreenZone{ Point2f{700,350}, 50 },
+	m_GreenZone{ Point2f{1300,350}, 50 },
 	m_RedZone{Point2f{100,350}, 50}
 {
 }

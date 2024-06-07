@@ -44,11 +44,15 @@ private:
 
 	GameState m_GameState;
 	Texture* m_IntroTxt;
+	Texture* m_SavedStat;
+	Texture* m_LostStat;
 
 	std::chrono::steady_clock::time_point m_LastSpawnTime;
 	std::vector<Entity*> m_Entity;
 	Map m_Map;
 	Player m_Player;
+
+	float m_SpawnTimer;
 
 	//Entity m_Entity;
 };
