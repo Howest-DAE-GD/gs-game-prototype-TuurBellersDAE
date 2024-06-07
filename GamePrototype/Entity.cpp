@@ -26,6 +26,8 @@ Entity::Entity(Point2f pos) :
 
 Entity::~Entity()
 {
+	m_Enemy = nullptr;
+	delete m_Enemy;
 }
 
 void Entity::Draw() const
@@ -91,18 +93,12 @@ void Entity::Update(Player& player, Map& map, Entity& entity, float elapsedSec) 
 	{
 		++m_EntitySaved;
 		m_State = State::secured;
-
-		m_Enemy = nullptr;
-		delete m_Enemy;
 		return;
 	}
 	if (map.IsInRedZone(*this))
 	{
 		++m_EntityLost;
 		m_State = State::abducted;
-
-		m_Enemy = nullptr;
-		delete m_Enemy;
 		return;
 	}
 
