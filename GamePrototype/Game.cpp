@@ -3,7 +3,8 @@
 
 Game::Game(const Window& window) : BaseGame(window),
 	m_SavedStat{ Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 40, Color4f{ 0,1,0,1 }) },
-	m_LostStat {Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 })}
+	m_LostStat {Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 })},
+	m_GameOver{ "GameOver","font.ttf", 100,Color4f{1,0,1,1} }
 {
 	Initialize();
 	m_LastSpawnTime = std::chrono::steady_clock::now();
@@ -73,11 +74,21 @@ void Game::Update( float elapsedSec )
 			}
 		}
 
+		m_SavedStat = Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 40, Color4f{ 0,1,0,1 });
+		m_LostStat = Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 });
+		break;
+	case GameState::gameOver:
+		m_SavedStat = Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 100, Color4f{ 0,1,0,1 });
+		m_LostStat = Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 });
 		break;
 	}
 
-	m_SavedStat = Texture(std::to_string(Entity::GetEntitySave()), "font.ttf", 40, Color4f{ 0,1,0,1 });
-	m_LostStat = Texture(std::to_string(Entity::GetEntityLost()), "font.ttf", 40, Color4f{ 1,0,0,1 });
+	
+
+	if (Entity::GetEntitySave() < Entity::GetEntityLost())
+	{
+		m_GameState = GameState::gameOver;
+	}
 }
 
 void Game::Draw( ) const
@@ -103,6 +114,10 @@ void Game::Draw( ) const
 		}
 		m_SavedStat.Draw(Point2f{ 15,650 }, Rectf{ 0,0,m_SavedStat.GetWidth(),m_SavedStat.GetHeight() });
 		m_LostStat.Draw(Point2f{ 15,600 }, Rectf{ 0,0,m_LostStat.GetWidth(),m_LostStat.GetHeight() });
+		break;
+	case GameState::gameOver:
+		m_GameOver.Draw(Point2f{ 700 - (m_GameOver.GetWidth() / 2), 350 - (m_GameOver.GetHeight() / 2) });
+		m_SavedStat.Draw(Point2f{ 700-(m_SavedStat.GetWidth()/2),100}, Rectf{0,0,m_SavedStat.GetWidth(),m_SavedStat.GetHeight()});
 		break;
 	}
 
